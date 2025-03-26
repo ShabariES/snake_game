@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: #222;
+        font-family: Arial, sans-serif;
+    }
+    #game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #game {
+        width: 300px;
+        height: 300px;
+        border: 2px solid white;
+        position: relative;
+    }
+    .pixel {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        background: white;
+        border-radius: 2px;
+    }
+    .food {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        background: #0f0;
+        border-radius: 50%;
+        box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+        animation: pulse 0.5s infinite alternate;
+    }
+    @keyframes pulse {
+        from {
+            box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+        }
+        to {
+            box-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+        }
+    }
+    h1 {
+        color: #fff;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    #score {
+        color: #fff;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    #reset-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #f00;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #reset-button:hover {
+        background-color: orange;
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Snake & Food Game!</h1>
+        <div id="score">Score: 0</div>
+        <div id="game"></div>
+        <button id="reset-button">RESET</button>
+    </div>
+
+<script>
+    var s = [{x:15, y:15}];
+    var d = 'r';
+    var score = 0;
+    var f = {x:Math.floor(Math.random()*30), y:Math.floor(Math.random()*30)};
+    var g = document.getElementById('game');
+    var scoreDisplay = document.getElementById('score');
+    var resetButton = document.getElementById('reset-button');
+    
+    function u() {
+        g.innerHTML = '';
+        for (var i = 0; i < s.length; i++) {
+            var e = s[i];
+            var p = document.createElement('div');
+            p.className = 'pixel';
+            p.style.left = e.x*10 + 'px';
+            p.style.top = e.y*10 + 'px';
+            if(i === 0) {
+                p.style.background = 'white';
+                p.style.borderRadius = '3px';
+            } else {
+                var intensity = Math.floor(200 - (i * 5));
+            }
+            g.appendChild(p);
+        }
+        
+        var fd = document.createElement('div');
+        fd.className = 'food';
+        fd.style.left = f.x*10 + 'px';
+        fd.style.top = f.y*10 + 'px';
+        g.appendChild(fd);
+        
+        scoreDisplay.textContent = 'Score: ' + score;
+    }
+    
+    function m() {
+        var h = {x: s[0].x, y: s[0].y};
+        if(d==='r') h.x++;
+        if(d==='l') h.x--;
+        if(d==='u') h.y--;
+        if(d==='d') h.y++;
+        
+        if(h.x === f.x && h.y === f.y) {
+            f = {x:Math.floor(Math.random()*30), y:Math.floor(Math.random()*30)};
+            s.push({x: s[s.length-1].x, y: s[s.length-1].y});
+            score += 10;
+            document.body.style.backgroundColor = '#333';
+        } else {
+            s.pop();
+        }
+        
+        s.unshift(h);
+        
+        var collision = false;
+        if(h.x < 0 || h.x >= 30 || h.y < 0 || h.y >= 30) {
+            collision = true;
+        } else {
+            for (var j = 1; j < s.length; j++) {
+                if (s[j].x === h.x && s[j].y === h.y) {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        
+        if(collision) {
+            document.body.style.backgroundColor = 'red';
+            setTimeout(function() {
+                document.body.style.backgroundColor = '#222';
+                resetGame();
+            }, 300);
+        }
+        u();
+    }
+    function resetGame() {
+        s = [{x:15, y:15}];
+        d = 'r';
+        score = 0;
+        f = {x:Math.floor(Math.random()*30), y:Math.floor(Math.random()*30)};
+        u();
+    }
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'ArrowUp' && d !== 'd') d = 'u';
+        if(e.key === 'ArrowDown' && d !== 'u') d = 'd';
+        if(e.key === 'ArrowLeft' && d !== 'r') d = 'l';
+        if(e.key === 'ArrowRight' && d !== 'l') d = 'r';
+    });
+    resetButton.addEventListener('click', resetGame);
+    setInterval(m, 100);
+    u();
+</script>
+</body>
+</html>
